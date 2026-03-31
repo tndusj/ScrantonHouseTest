@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스크랜튼대학 기숙사 배정 테스트</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+    }
+    .question {
+      margin: 30px 0;
+      font-size: 20px;
+      line-height: 1.5;
+    }
+    .intro {
+      margin: 60px 0;
+    }
+    .intro h1 {
+      margin-bottom: 16px;
+    }
+    .intro p {
+      margin-bottom: 24px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #334155;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+    button:hover {
+      background: #475569;
+    }
+    #result {
+      font-size: 24px;
+      margin-top: 30px;
+      white-space: pre-line;
+      line-height: 1.6;
+    }
+    #saveStatus {
+      margin-top: 16px;
+      font-size: 14px;
+      color: #cbd5e1;
+      white-space: normal;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div id="quiz"></div>
+  <div id="result"></div>
+  <div id="saveStatus"></div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHpzLjRjDRkHtHPl2l3NzlFLsHZ8NVBTJ7DKQLr8FdhO56c4qh4aP35bOek-9Wh_y2/exec";
+
+const questions = [
+  {
+    q: "수강신청 날, 당신의 행동은?",
+    a: [
+      ["열리는 순간 광클한다", "RANTON"],
+      ["전략 짜고 침착하게 접근", "SCREVEN"],
+      ["이미 실패를 예상하고 마음 비움", "BRAIN"],
+      ["외국인 친구에게 도움 요청", "INTERN"]
+    ]
+  },
+  {
+    q: "전공 수업이 부족할 때 당신은?",
+    a: [
+      ["바로 문제 제기한다", "RANTON"],
+      ["대안을 찾아 조합한다", "SCREVEN"],
+      ["그냥 버틴다", "BRAIN"],
+      ["다른 시스템 활용을 고민한다", "INTERN"]
+    ]
+  },
+  {
+    q: "ECC 구시아에 점심을 먹으러 갔다가 키오스크 줄에서 교수님을 마주쳤다. 당신의 선택은?",
+    a: [
+      ["먼저 아는 체 하며 교수님에게 스몰토크를 시전한다", "RANTON"],
+      ["절대 모르는 사람인 척 핸드폰만 본다", "SCREVEN"],
+      ["교수님이라고 인식하지 않으면 교수와 학생 관계가 아니므로 이웃집 토토로라고 생각하며 셀카를 찍는다", "BRAIN"],
+      ["과제와 수업에 관한 이야기로 유익한 정보를 얻어내기 위한 전략적 질문을 한다", "INTERN"]
+    ]
+  },
+  {
+    q: "국제교육관 702호 수업이 시작되기까지 4분 남았는데 엘리베이터 줄이 내 앞에서 잘렸다. 이때 당신의 선택은?",
+    a: [
+      ["현실을 받아들이고 건강을 생각하며 계단으로 간다", "RANTON"],
+      ["아쉬운 마음으로 집에 간다", "SCREVEN"],
+      ["화물용 엘리베이터로 달려가 가능성을 확인한다", "BRAIN"],
+      ["강의계획서의 출석 반영율을 확인하며 엘리베이터 줄에 그대로 서 있는다", "INTERN"]
+    ]
+  },
+  {
+    q: "새학기 개강 일주일 전, 여러 백 투 스쿨 파티에서 초대장을 받았다. 가장 참석하고 싶은 파티는 무엇인가?",
+    a: [
+      ["드레스코드가 화려해서 SNS에 올릴 사진을 많이 건질 듯한 파티", "RANTON"],
+      ["기업가 등 외부 인원도 참석하여 좋은 인맥을 만들 수 있을 듯한 파티", "SCREVEN"],
+      ["화려하진 않지만 학교 사람들과 어울릴 수 있는 프로그램이 잔뜩 마련된 파티", "BRAIN"],
+      ["~~한 파티", "INTERN"]
+    ]
+  },
+  {
+    q: "전공 시험 하루 전, 국제교육관 12층 열람실에서 공부하다 깜빡 잠이 들었다가 깼더니 누군가가 선물을 두고 갔다. 무엇이었을까?",
+    a: [
+      ["컵라면과 나무젓가락", "RANTON"],
+      ["초코파이", "SCREVEN"],
+      ["에너지드링크", "BRAIN"],
+      ["충전식 보조배터리", "INTERN"]
+    ]
+  },
+  {
+    q: "다른 마법학교 교수님의 초청 강연 심포지엄이 열린다고 한다. 어떤 세션에 참석하고 싶은가?",
+    a: [
+      ["처음 들어본 분야에서 최초로 스타트업을 만들었다는 도전적인 교수님", "RANTON"],
+      ["강연 주제와 강연자를 인스타그램 스토리에 올리면 꽤 멋져보일 것 같은 유명한 교수님", "SCREVEN"],
+      ["에너지드링크", "BRAIN"],
+      ["충전식 보조배터리", "INTERN"]
+    ]
+  },
+  {
+    q: "과제 폭탄 상황에서 당신은?",
+    a: [
+      ["밤 새서라도 끝낸다", "RANTON"],
+      ["효율적으로 분배한다", "SCREVEN"],
+      ["최소 기준만 맞춘다", "BRAIN"],
+      ["협업/정보 공유한다", "INTERN"]
+    ]
+  },
+  {
+    q: "학교생활에서 가장 중요한 것은?",
+    a: [
+      ["변화를 만드는 것", "RANTON"],
+      ["지식과 성취", "SCREVEN"],
+      ["버티는 생존력", "BRAIN"],
+      ["다양한 경험과 네트워크", "INTERN"]
+    ]
+  }
+];
+
+let current = -1;
+let score = {
+  RANTON: 0,
+  SCREVEN: 0,
+  BRAIN: 0,
+  INTERN: 0
+};
+
+function showStartPage() {
+  const quiz = document.getElementById("quiz");
+  const resultDiv = document.getElementById("result");
+  const saveStatusDiv = document.getElementById("saveStatus");
+
+  resultDiv.innerHTML = "";
+  saveStatusDiv.innerHTML = "";
+  quiz.innerHTML = `
+    <div class="intro">
+      <h1>🧙 스크랜튼대학 기숙사 배정</h1>
+      <p>당신은 어느 기숙사에 속하게 될까요?</p>
+      <button id="startBtn">test start!</button>
+    </div>
+  `;
+
+  document.getElementById("startBtn").onclick = startTest;
+}
+
+function startTest() {
+  current = 0;
+  score = {
+    RANTON: 0,
+    SCREVEN: 0,
+    BRAIN: 0,
+    INTERN: 0
+  };
+  showQuestion();
+}
+
+function showQuestion() {
+  const quiz = document.getElementById("quiz");
+  const resultDiv = document.getElementById("result");
+  const saveStatusDiv = document.getElementById("saveStatus");
+
+  quiz.innerHTML = "";
+  resultDiv.innerHTML = "";
+  saveStatusDiv.innerHTML = "";
+
+  if (current >= questions.length) {
+    showResult();
+    return;
+  }
+
+  const q = questions[current];
+  const title = document.createElement("div");
+  title.className = "question";
+  title.innerText = q.q;
+  quiz.appendChild(title);
+
+  q.a.forEach(answer => {
+    const btn = document.createElement("button");
+    btn.innerText = answer[0];
+    btn.onclick = () => {
+      score[answer[1]]++;
+      current++;
+      showQuestion();
+    };
+    quiz.appendChild(btn);
+  });
+}
+
+async function saveResultToGoogleSheets(resultKey) {
+  const saveStatusDiv = document.getElementById("saveStatus");
+
+  const payload = {
+    sessionId: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : "session-" + Date.now(),
+    result: resultKey,
+    score: score,
+    userAgent: navigator.userAgent
+  };
+
+  saveStatusDiv.innerText = "응답을 저장하는 중...";
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      saveStatusDiv.innerText = "응답이 저장되었습니다.";
+    } else {
+      saveStatusDiv.innerText = "저장에 실패했습니다.";
+      console.error("저장 실패:", data);
+    }
+  } catch (err) {
+    saveStatusDiv.innerText = "저장에 실패했습니다. 네트워크 상태를 확인해주세요.";
+    console.error("저장 실패:", err);
+  }
+}
+
+function showResult() {
+  const quiz = document.getElementById("quiz");
+  const resultDiv = document.getElementById("result");
+
+  quiz.innerHTML = "";
+
+  let max = Object.keys(score).reduce((a, b) => score[a] > score[b] ? a : b);
+
+  const results = {
+    RANTON: "🔥 RANTONdor\n정의감과 행동력의 기숙사.\n당신은 요구할 건 반드시 요구하는 타입입니다.",
+    SCREVEN: "🧠 Screvenclaw\n지성과 전략의 기숙사.\n당신은 효율과 논리를 중시합니다.",
+    BRAIN: "🧬 Brainpuff\n끈기와 생존의 기숙사.\n어떤 상황에서도 버텨내는 타입입니다.",
+    INTERN: "🌍 Interntherin\n적응과 네트워크의 기숙사.\n환경을 활용하는 능력이 뛰어납니다."
+  };
+
+  resultDiv.innerText = results[max];
+
+  saveResultToGoogleSheets(max);
+
+  const restartBtn = document.createElement("button");
+  restartBtn.innerText = "다시 테스트하기";
+  restartBtn.onclick = showStartPage;
+  resultDiv.appendChild(document.createElement("br"));
+  resultDiv.appendChild(restartBtn);
+}
+
+showStartPage();
+</script>
+
+</body>
+</html>
